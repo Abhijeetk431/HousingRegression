@@ -6,8 +6,8 @@ on:
   push:
     branches:
       - reg_branch
-      # - main
-      # - hyper_branch
+      - main
+      - hyper_branch
 
 jobs:
   build-and-run:
