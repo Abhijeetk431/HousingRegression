@@ -23,3 +23,14 @@ This will update requirements.txt file with the latest required packages. Post t
 `pip install -r requirements.txt`
 
 ## Data pull
+Once the setup is ready, the code to pull data is in utils.py. To run the code, just use the below commands.
+`python` <- This will open a Python Interpreter
+`from utils import load_data`
+`data = laod_data()`
+`print(data)`
+
+## Regression Models
+This project uses Linear ,Decision Tree and Random Forest regression models. The pulled data is split into test and train data sets. Train data is used to fit the model, and then, the model is used to derive target values which are compared to test data. By comparision, we can derive the values of MSE and R2. To run regression models fitting and performance evaluation, run
+`python regression.py`
+
+##
