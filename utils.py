@@ -2,6 +2,7 @@
 
 import pandas as pd
 import numpy as np
+from sklearn.model_selection import train_test_split
 
 def load_data():
     """
@@ -26,3 +27,22 @@ def load_data():
     df['MEDV'] = target  # here MEDV is our target variableb
 
     return df
+
+def split_data(df, target_column='MEDV', test_size=0.2, random_state=42):
+    """
+    Splits the DataFrame into features (X) and target (y),
+    then further splits them into training and testing sets.
+
+    Args:
+        df (pd.DataFrame): The input DataFrame.
+        target_column (str): The name of the target column.
+        test_size (float): The proportion of the dataset to include in the test split.
+        random_state (int): Controls the shuffling applied to the data before applying the split.
+
+    Returns:
+        tuple: X_train, X_test, y_train, y_test
+    """
+    X = df.drop(columns=[target_column])
+    y = df[target_column]
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_state)
+    return X_train, X_test, y_train, y_test
