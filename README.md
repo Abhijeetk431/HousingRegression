@@ -1,1 +1,25 @@
 # HousingRegression
+
+## Introduction
+This is a project created as part of MLOps Assignment 1. In this project the core task is to design, implement, and automate a machine learning workflow for predicting house prices using the Boston Housing dataset. It will include use of classical machine learning models, their performance comparision, and then enhancing it by including hyperparameter tuning. Automation will be handled using GitHub Actions.
+
+## Setup
+Clone this repo on your local machine
+`git clone git@github.com:Abhijeetk431/HousingRegression.git`
+
+Change directory to use the git repo
+`cd HousingRegression`
+
+Once in the directory, intialize conda environment using commands
+`conda init`
+`conda create -n housingregression python=3.13`
+`conda activate housingregression`
+
+This will acoda environment that the project will use, in case some changes to requirements is required, edit requirements.in and append the required package in the end of the file. After that compile the requirements using command
+`pip install pip-tools`
+`pip-compile requirements.in`
+
+This will update requirements.txt file with the latest required packages. Post this run the below command to install the dependencies
+`pip install -r requirements.txt`
+
+## Data pull
