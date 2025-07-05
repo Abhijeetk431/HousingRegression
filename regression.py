@@ -1,19 +1,27 @@
 # HousingRegression/regression.py
-# Using Linear , Decision Tree and Random Forest regression models
+# Using Ridge, Decision Tree and Random Forest regression models
 
 from utils import load_data, split_data
-from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import Ridge
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.model_selection import GridSearchCV 
 import pandas as pd
 
-def train_and_evaluate(model, X_train, y_train, X_test, y_test, model_name):
+import warnings
+from sklearn.exceptions import ConvergenceWarning
+warnings.filterwarnings("ignore", category=ConvergenceWarning)
+
+def train_and_evaluate(model, param_grid, X_train, y_train, X_test, y_test, model_name):
     """
-    Trains a given scikit-learn model and evaluates its performance on the test set.
+    Performs hyperparameter tuning using GridSearchCV, trains the best model,
+    and evaluates its performance on the test set.
 
     Args:
         model (estimator): The scikit-learn model object (e.g., LinearRegression()).
+        param_grid (dict): Dictionary with parameters names (str) as keys and lists of
+                           parameter settings to try as values.
         X_train (pd.DataFrame or np.array): Training features.
         y_train (pd.Series or np.array): Training target.
         X_test (pd.DataFrame or np.array): Test features.
@@ -23,9 +31,19 @@ def train_and_evaluate(model, X_train, y_train, X_test, y_test, model_name):
     Returns:
         dict: A dictionary containing MSE and R2 scores for the model.
     """
-    print(f"\n--- Training and Evaluating {model_name} ---")
-    model.fit(X_train, y_train)
-    y_pred = model.predict(X_test)
+    print(f"\n--- Training and Evaluating {model_name} with Hyperparameter tuning---")
+
+    grid_search = GridSearchCV(estimator=model, param_grid=param_grid,
+                               cv=5, scoring='neg_mean_squared_error', n_jobs=-1, verbose=1)
+    grid_search.fit(X_train, y_train)
+
+    best_model = grid_search.best_estimator_
+    best_params = grid_search.best_params_
+    best_score = -grid_search.best_score_
+    print(f"Best parameters found for {model_name}: {best_params}")
+    print(f"Best cross-validation MSE (from training set): {best_score:.4f}")
+    
+    y_pred = best_model.predict(X_test)
 
     mse = mean_squared_error(y_test, y_pred)
     r2 = r2_score(y_test, y_pred)
@@ -33,7 +51,7 @@ def train_and_evaluate(model, X_train, y_train, X_test, y_test, model_name):
     print(f"  MSE: {mse:.4f}")
     print(f"  R2: {r2:.4f}")
 
-    return {"MSE": mse, "R2": r2}
+    return {"MSE": mse, "R2": r2, "Best Params": best_params}
 
 def main():
     """
@@ -58,24 +76,51 @@ def main():
     # Initialize Models
     print("\nInitializing regression models...")
     # Added random_state for reproducibility
-    models = {
-        "Linear Regression": LinearRegression(),
-        "Decision Tree Regressor": DecisionTreeRegressor(random_state=42),
-        "Random Forest Regressor": RandomForestRegressor(random_state=42)
+    ridge_model = Ridge(random_state=42)
+    ridge_param_grid = {
+        'alpha': [0.1, 1.0, 10.0, 100.0],
+        'fit_intercept': [True, False],
+        'solver': ['auto', 'svd', 'cholesky', 'lsqr', 'sag']
+    }
+    # Decision Tree Regressor
+    dt_model = DecisionTreeRegressor(random_state=42)
+    dt_param_grid = {
+        'max_depth': [None, 10, 20, 30],
+        'min_samples_split': [2, 5, 10],
+        'min_samples_leaf': [1, 2, 4]
+    }
+    # Random Forest Regressor
+    rf_model = RandomForestRegressor(random_state=42)
+    rf_param_grid = {
+        'n_estimators': [100, 200, 300],
+        'max_features': ['sqrt', 'log2', None],
+        'min_samples_leaf': [1, 2, 4]
+    }
+    
+    models_and_grids = {
+        "Ridge Regression": {"model": ridge_model, "param_grid": ridge_param_grid},
+        "Decision Tree Regressor": {"model": dt_model, "param_grid": dt_param_grid},
+        "Random Forest Regressor": {"model": rf_model, "param_grid": rf_param_grid}
     }
 
     results = {}
 
     # Train and Evaluate Each Model
     print("\nTraining and evaluating models...")
-    for model_name, model_instance in models.items():
-        model_scores = train_and_evaluate(model_instance, X_train, y_train, X_test, y_test, model_name)
+    for model_name, config in models_and_grids.items():
+        model_scores = train_and_evaluate(config["model"], config["param_grid"],
+                                          X_train, y_train, X_test, y_test, model_name)
         results[model_name] = model_scores
 
     # Performance Comparison
     print("\n===== Performance Comparison =====")
-    results_df = pd.DataFrame(results).T
+    summary_results = {k: {key: val for key, val in v.items() if key != 'Best Params'} for k, v in results.items()}
+    results_df = pd.DataFrame(summary_results).T
     print(results_df)
+
+    print("\n===== Best Parameters Found for Each Model =====")
+    for model_name, res in results.items():
+        print(f"{model_name}: {res['Best Params']}")
 
 
 if __name__ == "__main__":

@@ -32,5 +32,11 @@ Once the setup is ready, the code to pull data is in utils.py. To run the code, 
 ## Regression Models
 This project uses Linear ,Decision Tree and Random Forest regression models. The pulled data is split into test and train data sets. Train data is used to fit the model, and then, the model is used to derive target values which are compared to test data. By comparision, we can derive the values of MSE and R2. To run regression models fitting and performance evaluation, run
 `python regression.py`
+Ensure that the code is checkout out to reg_branch, else the main branch with hyperparamter tuning will also run
 
-##
+## Hyper parameter tuning
+Since linear regression does not support atleast 3 hyperparametrs, for hyperparameter tuning, this project gets rid of linear regression model and in placeof it introduces Ridge regression model. To run the model fitting and performance evaluation along with hyperparameter tuning, from main or hyper_branch in the repo run command
+`python regression.py`
+
+## Conclusion
+Thus, this project covers ask of using three different Regression ML models for predicting the house prices using Boston Housing Dataset along with ability of hyperparameter tuning.
